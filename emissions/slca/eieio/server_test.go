@@ -27,8 +27,8 @@ import (
 	"testing"
 
 	"github.com/BurntSushi/toml"
-	"github.com/spatialmodel/inmap/emissions/slca/eieio/eieiorpc"
-	"github.com/spatialmodel/inmap/epi"
+	"github.com/Amen-Tes/inmap/emissions/slca/eieio/eieiorpc"
+	"github.com/Amen-Tes/inmap/epi"
 )
 
 func TestServer_grpc(t *testing.T) {
@@ -330,9 +330,9 @@ func TestServer_grpc(t *testing.T) {
 			{
 				impactType: "emis",
 				pollutant:  eieiorpc.Pollutant_TotalPM25,
-				colors: [][]uint8{[]uint8{0x0, 0x0, 0x0}, []uint8{0x0, 0x0, 0x0}, []uint8{0xff, 0xff, 0xff}, []uint8{0x0, 0x0, 0x0},
-					[]uint8{0x0, 0x0, 0x0}, []uint8{0x27, 0x16, 0xb7}, []uint8{0x0, 0x0, 0x0}, []uint8{0xff, 0xff, 0xff},
-					[]uint8{0x27, 0x16, 0xb7}, []uint8{0x27, 0x16, 0xb7}},
+				colors: [][]uint8{[]uint8{0x0, 0x0, 0x0}, []uint8{0x0, 0x0, 0x0}, []uint8{0x0, 0x0, 0x0},
+					[]uint8{0x0, 0x0, 0x0}, []uint8{0x0, 0x0, 0x0}, []uint8{0xff, 0xff, 0xff}, []uint8{0x0, 0x0, 0x0},
+					[]uint8{0x0, 0x0, 0x0}, []uint8{0x0, 0x0, 0x0}, []uint8{0x0, 0x0, 0x0}},
 			},
 		} {
 			t.Run(test.impactType, func(t *testing.T) {
@@ -352,7 +352,7 @@ func TestServer_grpc(t *testing.T) {
 					t.Fatal(err)
 				}
 				if !reflect.DeepEqual(mapInfo.RGB, test.colors) {
-					t.Errorf("%#v != %v", mapInfo.RGB, test.colors)
+					t.Errorf("%v != %v", mapInfo.RGB, test.colors)
 				}
 			})
 		}

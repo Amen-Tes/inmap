@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/spatialmodel/inmap/inmaputil"
+	"github.com/Amen-Tes/inmap/inmaputil"
 )
 
 const evalDataEnv = "evaldata"

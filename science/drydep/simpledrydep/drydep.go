@@ -23,7 +23,7 @@ package simpledrydep
 import (
 	"math"
 
-	"github.com/spatialmodel/inmap"
+	"github.com/Amen-Tes/inmap"
 )
 
 // SOx specifies array indicies that hold sulfur oxide concentrations.

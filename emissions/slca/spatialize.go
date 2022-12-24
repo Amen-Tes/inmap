@@ -29,13 +29,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/spatialmodel/inmap"
-	"github.com/spatialmodel/inmap/emissions/aep"
-	"github.com/spatialmodel/inmap/emissions/aep/aeputil"
-	"github.com/spatialmodel/inmap/internal/hash"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/emissions/aep"
+	"github.com/Amen-Tes/inmap/emissions/aep/aeputil"
+	"github.com/Amen-Tes/inmap/internal/hash"
 
 	"github.com/ctessum/sparse"
 
+	"github.com/ctessum/geom"
 	"github.com/ctessum/requestcache"
 )
 
@@ -335,9 +336,9 @@ func (c *CSTConfig) scaleFlattenSrg(srg []*inmap.EmisRecord, aqm string, pol Pol
 		cells := aqmIndex.SearchIntersect(rec.Geom.Bounds())
 		for _, cI := range cells {
 			c := cI.(gridIndex)
-			//if rec.Geom.(geom.Point).Within(c) == geom.Outside {
-			//	panic("only rectangular grid cells are supported")
-			//}
+			if rec.Geom.(geom.Point).Within(c) == geom.Outside {
+				panic("only rectangular grid cells are supported")
+			}
 			var v float64
 			switch pol {
 			case PM25:

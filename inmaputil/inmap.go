@@ -22,17 +22,16 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
 	"os"
 	"runtime"
 	"sync"
 	"time"
 
 	"github.com/ctessum/geom"
-	"github.com/spatialmodel/inmap"
-	"github.com/spatialmodel/inmap/emissions/aep"
-	"github.com/spatialmodel/inmap/emissions/aep/aeputil"
-	"github.com/spatialmodel/inmap/science/chem/simplechem"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/emissions/aep"
+	"github.com/Amen-Tes/inmap/emissions/aep/aeputil"
+	"github.com/Amen-Tes/inmap/science/chem/simplechem"
 	"github.com/spf13/cobra"
 )
 
@@ -340,26 +339,6 @@ func setEmissionsAEP(inventoryConfig *aeputil.InventoryConfig, spatialConfig *ae
 		recs, _, err = inventoryConfig.ReadEmissions() // Remember to check error below.
 	}
 
-	if mask != nil { // Remove records that do not overlap with mask.
-		mb := mask.Bounds()
-		for s, srecs := range recs {
-			i := 0 // output index
-			for _, r := range srecs {
-				if r.Location().Bounds().Overlaps(mb) {
-					// copy and increment index
-					srecs[i] = r
-					i++
-				}
-			}
-			// Prevent memory leak by erasing truncated values
-			for j := i; j < len(srecs); j++ {
-				srecs[j] = nil
-			}
-			srecs = srecs[:i]
-			recs[s] = srecs
-		}
-	}
-
 	return func(d *inmap.InMAP) error {
 		if err != nil { // Check error from ReadEmissions
 			return err
@@ -382,13 +361,6 @@ func setEmissionsAEP(inventoryConfig *aeputil.InventoryConfig, spatialConfig *ae
 				break
 			} else if err != nil {
 				return err
-			}
-			var totalEmis float64
-			for _, v := range rec.Totals() {
-				totalEmis += math.Abs(v.Value())
-			}
-			if totalEmis == 0 {
-				continue
 			}
 			spatialRecs = append(spatialRecs, rec.(aep.RecordGridded))
 		}

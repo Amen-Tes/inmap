@@ -1,8 +1,8 @@
-FROM golang:1.16
+FROM golang:1.15
 
 WORKDIR /app
 
-RUN git clone --depth=1 https://github.com/spatialmodel/inmap.git
+RUN git clone --depth=1 https://github.com/Amen-Tes/inmap.git
 
 WORKDIR /app/inmap
 

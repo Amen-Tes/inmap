@@ -23,8 +23,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/spatialmodel/inmap"
-	"github.com/spatialmodel/inmap/cloud"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/cloud"
 )
 
 func TestSR(t *testing.T) {

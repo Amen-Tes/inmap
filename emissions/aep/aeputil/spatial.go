@@ -19,7 +19,6 @@ along with InMAP.  If not, see <http://www.gnu.org/licenses/>.
 package aeputil
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"log"
@@ -33,7 +32,7 @@ import (
 	"github.com/ctessum/geom"
 	"github.com/ctessum/geom/proj"
 	"github.com/ctessum/unit"
-	"github.com/spatialmodel/inmap/emissions/aep"
+	"github.com/Amen-Tes/inmap/emissions/aep"
 )
 
 // SpatialConfig holds emissions spatialization configuration information.
@@ -45,19 +44,6 @@ type SpatialConfig struct {
 	// SrgSpecOSM gives the location of the OSM-formatted
 	// surrogate specification file, if any.
 	SrgSpecOSM string
-
-	// PostGISURL specifies the URL to use to connect to a PostGIS database
-	// with the OpenStreetMap data loaded. The URL should be in the format:
-	// postgres://username:password@hostname:port/databasename".
-	//
-	// The OpenStreetMap data can be loaded into the database using the
-	// osm2pgsql program, for example with the command:
-	// osm2pgsql -l --hstore-all --hstore-add-index --database=databasename --host=hostname --port=port --username=username --create planet_latest.osm.pbf
-	//
-	// The -l and --hstore-all flags for the osm2pgsql command are both necessary,
-	// and the PostGIS database should have the "hstore" extension installed before
-	// loading the data.
-	PostGISURL string
 
 	// SrgShapefileDirectory gives the location of the directory holding
 	// the shapefiles used for creating spatial surrogates.
@@ -271,7 +257,7 @@ func (c *SpatialConfig) SpatialProcessor() (*aep.SpatialProcessor, error) {
 	return c.sp, nil
 }
 
-func readSrgSpec(srgSpecSMOKEPath, srgSpecOSMPath, postGISURL, srgShapefileDirectory string, sccExactMatch bool, diskCachePath string, memCacheEntries int) (*aep.SrgSpecs, error) {
+func readSrgSpec(srgSpecSMOKEPath, srgSpecOSMPath, srgShapefileDirectory string, sccExactMatch bool, diskCachePath string, memCacheEntries int) (*aep.SrgSpecs, error) {
 	srgSpecs := aep.NewSrgSpecs()
 	if srgSpecSMOKEPath != "" {
 		f, err := os.Open(os.ExpandEnv(srgSpecSMOKEPath))
@@ -292,7 +278,7 @@ func readSrgSpec(srgSpecSMOKEPath, srgSpecOSMPath, postGISURL, srgShapefileDirec
 		if err != nil {
 			return nil, fmt.Errorf("aep: opening OSM surrogate specification: %v", err)
 		}
-		srgSpecsTemp, err := aep.ReadSrgSpecOSM(context.Background(), f, postGISURL)
+		srgSpecsTemp, err := aep.ReadSrgSpecOSM(f, diskCachePath, memCacheEntries)
 		if err != nil {
 			return nil, err
 		}
@@ -347,7 +333,7 @@ func (c *SpatialConfig) setupSpatialProcessor() (*aep.SpatialProcessor, error) {
 		cacheLoc = c.SpatialCache
 	}
 
-	srgSpecs, err := readSrgSpec(c.SrgSpecSMOKE, c.SrgSpecOSM, c.PostGISURL, c.SrgShapefileDirectory, c.SCCExactMatch, cacheLoc, c.MaxCacheEntries)
+	srgSpecs, err := readSrgSpec(c.SrgSpecSMOKE, c.SrgSpecOSM, c.SrgShapefileDirectory, c.SCCExactMatch, cacheLoc, c.MaxCacheEntries)
 	if err != nil {
 		return nil, err
 	}

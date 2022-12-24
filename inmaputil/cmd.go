@@ -33,8 +33,8 @@ import (
 	"github.com/ctessum/gobra"
 	"github.com/lnashier/viper"
 	"github.com/skratchdot/open-golang/open"
-	"github.com/spatialmodel/inmap"
-	"github.com/spatialmodel/inmap/science/chem/simplechem"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/science/chem/simplechem"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -836,22 +836,6 @@ variable specifies the information to be output.`,
 			flagsets:    []*pflag.FlagSet{cfg.steadyCmd.Flags(), cfg.cloudStartCmd.Flags()},
 		},
 		{
-			name: "aep.PostGISURL",
-			usage: `PostGISURL specifies the URL to use to connect to a PostGIS database
-with the OpenStreetMap data loaded. The URL should be in the format:
-postgres://username:password@hostname:port/databasename".
-
-The OpenStreetMap data can be loaded into the database using the
-osm2pgsql program, for example with the command:
-osm2pgsql -l --hstore-all --hstore-add-index --database=databasename --host=hostname --port=port --username=username --create planet_latest.osm.pbf
-
-The -l and --hstore-all flags for the osm2pgsql command are both necessary,
-and the PostGIS database should have the "hstore" extension installed before
-loading the data.`,
-			defaultVal: "",
-			flagsets:   []*pflag.FlagSet{cfg.steadyCmd.Flags(), cfg.cloudStartCmd.Flags()},
-		},
-		{
 			name: "aep.SrgShapefileDirectory",
 			usage: `SrgShapefileDirectory gives the location of the directory holding the shapefiles used for creating spatial surrogates. It is used for assigning spatial locations to emissions records. It is only used when SrgSpecType == "SMOKE".
 `,
@@ -1076,12 +1060,6 @@ loading the data.`,
 			name:       "memory_gb",
 			usage:      `memory_gb specifies the gigabytes of RAM memory required for this job.`,
 			defaultVal: 20,
-			flagsets:   []*pflag.FlagSet{cfg.cloudStartCmd.Flags(), cfg.srStartCmd.Flags()},
-		},
-		{
-			name:       "version",
-			usage:      `version specifies the version of the InMAP Docker container to use, such as "latest" or "v1.7.2".`,
-			defaultVal: "latest",
 			flagsets:   []*pflag.FlagSet{cfg.cloudStartCmd.Flags(), cfg.srStartCmd.Flags()},
 		},
 		{

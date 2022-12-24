@@ -25,8 +25,8 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/gonum/floats"
-	"github.com/spatialmodel/inmap/emissions/slca/eieio/eieiorpc"
-	"github.com/spatialmodel/inmap/epi"
+	"github.com/Amen-Tes/inmap/emissions/slca/eieio/eieiorpc"
+	"github.com/Amen-Tes/inmap/epi"
 	"gonum.org/v1/gonum/mat"
 )
 

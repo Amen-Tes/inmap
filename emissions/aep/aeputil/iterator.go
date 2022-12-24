@@ -21,7 +21,7 @@ package aeputil
 import (
 	"io"
 
-	"github.com/spatialmodel/inmap/emissions/aep"
+	"github.com/Amen-Tes/inmap/emissions/aep"
 )
 
 // Iterator is an iterface for types that can iterate through a list of

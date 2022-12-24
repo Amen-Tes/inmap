@@ -26,9 +26,9 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
-	"github.com/spatialmodel/inmap"
-	"github.com/spatialmodel/inmap/cloud"
-	"github.com/spatialmodel/inmap/cloud/cloudrpc"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/cloud"
+	"github.com/Amen-Tes/inmap/cloud/cloudrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -52,7 +52,6 @@ func NewCloudClient(cfg *Cfg) (cloudrpc.CloudRPCClient, error) {
 func CloudJobStart(ctx context.Context, c cloudrpc.CloudRPCClient, cfg *Cfg) error {
 	in, err := cloud.JobSpec(
 		cfg.Root, cfg.Viper,
-		cfg.GetString("version"),
 		cfg.GetString("job_name"),
 		cfg.GetStringSlice("cmds"),
 		cfg.InputFiles(),

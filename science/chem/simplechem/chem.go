@@ -23,12 +23,12 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/spatialmodel/inmap"
-	"github.com/spatialmodel/inmap/science/drydep/simpledrydep"
-	"github.com/spatialmodel/inmap/science/wetdep/emepwetdep"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/science/drydep/simpledrydep"
+	"github.com/Amen-Tes/inmap/science/wetdep/emepwetdep"
 )
 
-// Mechanism fulfils the github.com/spatialmodel/inmap.Mechanism
+// Mechanism fulfils the github.com/Amen-Tes/inmap.Mechanism
 // interface.
 type Mechanism struct{}
 
@@ -47,8 +47,8 @@ const (
 	// Chemical mass conversions [ratios]
 	NOxToN = mwN / mwNOx
 	NtoNO3 = mwNO3 / mwN
-	SOxToS = mwS / mwSO2
-	StoSO4 = mwSO4 / mwS
+	SOxToS = mwSO2 / mwS
+	StoSO4 = mwS / mwSO4
 	NH3ToN = mwN / mwNH3
 	NtoNH4 = mwNH4 / mwN
 )

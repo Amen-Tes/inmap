@@ -8,9 +8,9 @@ package eval
 	"path/filepath"
 	"testing"
 
-	"github.com/spatialmodel/inmap"
-	"github.com/spatialmodel/inmap/inmaputil"
-	"github.com/spatialmodel/inmap/science/chem/mosaic"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/inmaputil"
+	"github.com/Amen-Tes/inmap/science/chem/mosaic"
 )
 
 func TestNEI2005Dynamic_mosaic(t *testing.T) {

@@ -22,8 +22,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/spatialmodel/inmap"
-	"github.com/spatialmodel/inmap/science/chem/simplechem"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/science/chem/simplechem"
 )
 
 func TestSaveLoad(t *testing.T) {

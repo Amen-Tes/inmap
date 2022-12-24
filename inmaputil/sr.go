@@ -25,9 +25,9 @@ import (
 	"os"
 
 	"github.com/ctessum/geom"
-	"github.com/spatialmodel/inmap"
-	"github.com/spatialmodel/inmap/cloud/cloudrpc"
-	"github.com/spatialmodel/inmap/sr"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/cloud/cloudrpc"
+	"github.com/Amen-Tes/inmap/sr"
 )
 
 // StartSR starts the SR matrix creator, getting configuration information from the
@@ -59,8 +59,7 @@ func StartSR(ctx context.Context, jobName string, cmds []string, memoryGB int32,
 	if err != nil {
 		return err
 	}
-	version := cfg.GetString("version")
-	if err = sr.Start(ctx, jobName, version, layers, begin, end, cfg.Root, cfg.Viper, cmds, cfg.InputFiles(), memoryGB); err != nil {
+	if err = sr.Start(ctx, jobName, layers, begin, end, cfg.Root, cfg.Viper, cmds, cfg.InputFiles(), memoryGB); err != nil {
 		return err
 	}
 	return nil

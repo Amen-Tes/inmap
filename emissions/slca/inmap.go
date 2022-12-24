@@ -25,17 +25,17 @@ import (
 	"os"
 	"strings"
 
-	"github.com/spatialmodel/inmap"
-	"github.com/spatialmodel/inmap/emissions/aep"
-	"github.com/spatialmodel/inmap/emissions/aep/aeputil"
-	"github.com/spatialmodel/inmap/emissions/slca/eieio/eieiorpc"
-	"github.com/spatialmodel/inmap/internal/hash"
-	"github.com/spatialmodel/inmap/sr"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/emissions/aep"
+	"github.com/Amen-Tes/inmap/emissions/aep/aeputil"
+	"github.com/Amen-Tes/inmap/emissions/slca/eieio/eieiorpc"
+	"github.com/Amen-Tes/inmap/internal/hash"
+	"github.com/Amen-Tes/inmap/sr"
 
 	"github.com/ctessum/geom"
 	"github.com/ctessum/geom/proj"
 	"github.com/ctessum/requestcache"
-	"github.com/spatialmodel/inmap/epi"
+	"github.com/Amen-Tes/inmap/epi"
 
 	"github.com/ctessum/sparse"
 )

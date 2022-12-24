@@ -58,8 +58,8 @@ const (
 	// Chemical mass conversions [ratios]
 	NOxToN = mwN / mwNOx
 	NtoNO3 = mwNO3 / mwN
-	SOxToS = mwS / mwSO2 
-	StoSO4 = mwSO4 / mwS 
+	SOxToS = mwSO2 / mwS
+	StoSO4 = mwS / mwSO4
 	NH3ToN = mwN / mwNH3
 	NtoNH4 = mwNH4 / mwN
 )

@@ -6,7 +6,7 @@ import (
 	"io"
 	"log"
 
-	"github.com/spatialmodel/inmap/emissions/slca"
+	"github.com/Amen-Tes/inmap/emissions/slca"
 
 	"github.com/ctessum/unit"
 )

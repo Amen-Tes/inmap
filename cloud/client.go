@@ -25,7 +25,8 @@ import (
 
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/lnashier/viper"
-	"github.com/spatialmodel/inmap/cloud/cloudrpc"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/cloud/cloudrpc"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	batch "k8s.io/api/batch/v1"
@@ -82,6 +83,7 @@ func NewClient(k kubernetes.Interface, root *cobra.Command, config *viper.Viper,
 		config:         config,
 		inputFileArgs:  inputFileArgs,
 		outputFileArgs: outputFileArgs,
+		Image:          "inmap/inmap:latest",
 	}
 
 	grpcServer := grpc.NewServer(grpc.MaxMsgSize(4.295e+9)) // 4 gib max message size.
@@ -95,6 +97,10 @@ func NewClient(k kubernetes.Interface, root *cobra.Command, config *viper.Viper,
 // the given command with the given command-line arguments on the given container
 // image. resources specifies the minimum required resources for execution.
 func (c *Client) RunJob(ctx context.Context, job *cloudrpc.JobSpec) (*cloudrpc.JobStatus, error) {
+	if job.Version != inmap.Version {
+		return nil, fmt.Errorf("incorrect InMAP version: %s != %s", job.Version, inmap.Version)
+	}
+
 	status, err := c.Status(ctx, &cloudrpc.JobName{Name: job.Name, Version: job.Version})
 	if status.Status != cloudrpc.Status_Missing && err != nil {
 		return nil, err
@@ -118,7 +124,7 @@ func (c *Client) RunJob(ctx context.Context, job *cloudrpc.JobSpec) (*cloudrpc.J
 	if err != nil {
 		return nil, err
 	}
-	k8sJob := createJob(userJobName(user, job.Name), job.Cmd, job.Args, job.Version, core.ResourceList{
+	k8sJob := createJob(userJobName(user, job.Name), job.Cmd, job.Args, c.Image, core.ResourceList{
 		core.ResourceMemory: resource.MustParse(fmt.Sprintf("%dGi", job.MemoryGB)),
 	}, c.Volumes)
 	_, err = c.jobControl.Create(ctx, k8sJob, meta.CreateOptions{})
@@ -144,6 +150,9 @@ func (c *Client) Delete(ctx context.Context, job *cloudrpc.JobName) (*cloudrpc.J
 }
 
 func (c *Client) getk8sJob(ctx context.Context, job *cloudrpc.JobName) (*batch.Job, error) {
+	if job.Version != inmap.Version {
+		return nil, fmt.Errorf("incorrect InMAP version: %s != %s", job.Version, inmap.Version)
+	}
 	user, err := getUser(ctx)
 	if err != nil {
 		return nil, err
@@ -220,8 +229,7 @@ func (c *Client) Status(ctx context.Context, job *cloudrpc.JobName) (*cloudrpc.J
 // image. resources specifies the minimum required resources for execution.
 // volumes holds the list of k8s volumes to mount, with all volumes assumed to
 // be read-only.
-// Version is the version of the InMAP docker image to use, such as "latest" or "v1.7.2".
-func createJob(name string, command, args []string, version string, resources core.ResourceList, volumes []core.Volume) *batch.Job {
+func createJob(name string, command, args []string, image string, resources core.ResourceList, volumes []core.Volume) *batch.Job {
 	volumeMounts := make([]core.VolumeMount, len(volumes))
 	for i, v := range volumes {
 		volumeMounts[i] = core.VolumeMount{
@@ -249,7 +257,7 @@ func createJob(name string, command, args []string, version string, resources co
 					Containers: []core.Container{
 						{
 							Name:    "inmap-container",
-							Image:   fmt.Sprintf("inmap/inmap:%s", version),
+							Image:   image,
 							Command: command,
 							Args:    args,
 							Resources: core.ResourceRequirements{

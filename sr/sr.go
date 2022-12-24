@@ -40,10 +40,10 @@ import (
 	"github.com/ctessum/geom"
 	"github.com/ctessum/geom/encoding/shp"
 	"github.com/lnashier/viper"
-	"github.com/spatialmodel/inmap"
-	"github.com/spatialmodel/inmap/cloud"
-	"github.com/spatialmodel/inmap/cloud/cloudrpc"
-	"github.com/spatialmodel/inmap/science/chem/simplechem"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/cloud"
+	"github.com/Amen-Tes/inmap/cloud/cloudrpc"
+	"github.com/Amen-Tes/inmap/science/chem/simplechem"
 	"github.com/spf13/cobra"
 )
 
@@ -117,8 +117,7 @@ func (sr *SR) layerGridCells(layers []int) (int, error) {
 // should be calculated for. begin and end are indices in the static variable
 // grid where the computations should begin and end. if end<0, then end will
 // be set to the last grid cell in the static grid.
-// Version is the version of the InMAP docker container to use, e.g. "latest" or "v1.7.2".
-func (sr *SR) Start(ctx context.Context, jobName, version string, layers []int, begin, end int, root *cobra.Command, config *viper.Viper, cmdArgs, inputFiles []string, memoryGB int32) error {
+func (sr *SR) Start(ctx context.Context, jobName string, layers []int, begin, end int, root *cobra.Command, config *viper.Viper, cmdArgs, inputFiles []string, memoryGB int32) error {
 	// Set mandatory configuration variables.
 	config.Set("OutputVariables", outputVarsStr)
 	config.Set("EmissionUnits", "ug/s")
@@ -154,7 +153,7 @@ func (sr *SR) Start(ctx context.Context, jobName, version string, layers []int, 
 		}
 		config.Set("EmissionsShapefiles", []string{fname})
 
-		js, err := cloud.JobSpec(root, config, version, sr.jobName(jobName, i, cell), cmdArgs, inputFiles, memoryGB)
+		js, err := cloud.JobSpec(root, config, sr.jobName(jobName, i, cell), cmdArgs, inputFiles, memoryGB)
 		if err != nil {
 			return err
 		}

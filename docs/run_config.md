@@ -10,7 +10,7 @@ InMAP can be run by opening a command line terminal and running the command `inm
 
     inmap subcommand1 subcommand2 --arg1=x --arg2=y
 
-If InMAP was downloaded from the [releases page](https://github.com/spatialmodel/inmap/releases) as a pre-compiled binary rather than compiled from source, you will need to navigate to the directory that InMAP was downloaded to and run the downloaded file, for example as in:
+If InMAP was downloaded from the [releases page](https://github.com/Amen-Tes/inmap/releases) as a pre-compiled binary rather than compiled from source, you will need to navigate to the directory that InMAP was downloaded to and run the downloaded file, for example as in:
 
     ./inmapX.X.Xlinux-amd64 subcommand1 subcommand2 --arg1=x --arg2=y
 
@@ -48,13 +48,13 @@ In general, configuration variables can be specified in the the format `VarName 
 
 For configuration values with a `.` in them, for example `VarGrid.VariableGridXo` and `VarGrid.VariableGridYo`, the part of the name before the `.` represents a category and the part of the name after the `.` represents a variable within that category. In the TOML configuration file, this must be specified in the following way:
 
-``` TOML
+```TOML
 [VarGrid]
 VariableGridXo = 42.0
 VariableGridYo = -42.0
 ```
 
-For additional information, refer to the [TOML specification](https://github.com/toml-lang/toml), or to the [example configuration files](https://github.com/spatialmodel/inmap/tree/master/cmd/inmap).
+For additional information, refer to the [TOML specification](https://github.com/toml-lang/toml), or to the [example configuration files](https://github.com/Amen-Tes/inmap/tree/master/cmd/inmap).
 
 ### Environment variables
 

@@ -33,10 +33,10 @@ import (
 	"github.com/ctessum/geom/encoding/geojson"
 	"github.com/ctessum/geom/proj"
 	"github.com/lnashier/viper"
-	"github.com/spatialmodel/inmap"
-	"github.com/spatialmodel/inmap/cloud"
-	"github.com/spatialmodel/inmap/emissions/aep"
-	"github.com/spatialmodel/inmap/emissions/aep/aeputil"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/cloud"
+	"github.com/Amen-Tes/inmap/emissions/aep"
+	"github.com/Amen-Tes/inmap/emissions/aep/aeputil"
 	"github.com/spf13/cast"
 )
 
@@ -230,7 +230,6 @@ func aeputilConfig(cfg *viper.Viper) (*aeputil.InventoryConfig, *aeputil.Spatial
 		InputUnits:            cfg.GetString("aep.InventoryConfig.InputUnits"),
 		SrgSpecSMOKE:          srgSpecSMOKE,
 		SrgSpecOSM:            srgSpecOSM,
-		PostGISURL:            os.ExpandEnv(cfg.GetString("aep.PostGISURL")),
 		SrgShapefileDirectory: cfg.GetString("aep.SrgShapefileDirectory"),
 		GridRef:               gridRef,
 		SCCExactMatch:         cfg.GetBool("aep.SCCExactMatch"),
@@ -246,7 +245,6 @@ func aeputilConfig(cfg *viper.Viper) (*aeputil.InventoryConfig, *aeputil.Spatial
 	s := &aeputil.SpatialConfig{
 		SrgSpecSMOKE:          srgSpecSMOKE,
 		SrgSpecOSM:            srgSpecOSM,
-		PostGISURL:            os.ExpandEnv(cfg.GetString("aep.PostGISURL")),
 		SrgShapefileDirectory: cfg.GetString("aep.SrgShapefileDirectory"),
 		SCCExactMatch:         cfg.GetBool("aep.SCCExactMatch"),
 		GridRef:               gridRef,

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/ctessum/unit"
-	"github.com/spatialmodel/inmap/emissions/slca"
+	"github.com/Amen-Tes/inmap/emissions/slca"
 )
 
 func TestSpeciate(t *testing.T) {

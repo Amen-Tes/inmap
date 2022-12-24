@@ -26,8 +26,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/spatialmodel/inmap/cloud"
-	"github.com/spatialmodel/inmap/cloud/cloudrpc"
+	"github.com/Amen-Tes/inmap/cloud"
+	"github.com/Amen-Tes/inmap/cloud/cloudrpc"
 )
 
 func TestCloud(t *testing.T) {

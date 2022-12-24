@@ -33,11 +33,11 @@ import (
 	"github.com/ctessum/geom/index/rtree"
 	"github.com/ctessum/requestcache/v4"
 	"github.com/ctessum/sparse"
-	"github.com/spatialmodel/inmap/internal/hash"
+	"github.com/Amen-Tes/inmap/internal/hash"
 )
 
 type srgGenWorker struct {
-	surrogates SearchIntersecter
+	surrogates *rtree.Rtree
 	GridCells  *GridDef
 
 	// srgCellRatio is the number of surrogate shapes to process per
@@ -48,7 +48,7 @@ type srgGenWorker struct {
 }
 
 type srgGenWorkerInitData struct {
-	Surrogates SearchIntersecter
+	Surrogates *rtree.Rtree
 	GridCells  *GridDef
 }
 
@@ -263,7 +263,7 @@ func (g *GriddedSrgData) WriteToShp(file string) error {
 }
 
 func genSrgWorker(singleShapeChan, griddedSrgChan chan *GriddedSrgData,
-	errchan chan error, gridData *GridDef, srgData SearchIntersecter, srgCellRatio int) {
+	errchan chan error, gridData *GridDef, srgData *rtree.Rtree, srgCellRatio int) {
 	var err error
 
 	s := new(srgGenWorker)
@@ -327,14 +327,10 @@ func (s *srgGenWorker) Calculate(data, result *GriddedSrgData) (err error) {
 	return
 }
 
-type SearchIntersecter interface {
-	SearchIntersect(*geom.Bounds) []geom.Geom
-}
-
 // Calculate the intersections between the grid cells and the input shape,
 // and between the surrogate shapes and the input shape
 func (s *srgGenWorker) intersections1(
-	data *GriddedSrgData, surrogates SearchIntersecter, inputGeom geom.Polygonal) (
+	data *GriddedSrgData, surrogates *rtree.Rtree, inputGeom geom.Polygonal) (
 	GridCells []*GridCell, srgs []*srgHolder,
 	singleShapeSrgWeight float64, err error) {
 

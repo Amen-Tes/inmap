@@ -20,6 +20,7 @@ package slca
 import (
 	"context"
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"math"
 	"runtime"
@@ -33,12 +34,138 @@ import (
 	"github.com/ctessum/geom/index/rtree"
 	"github.com/ctessum/geom/proj"
 	"github.com/ctessum/requestcache"
-	"github.com/spatialmodel/inmap/emissions/slca/eieio/eieiorpc"
-	"github.com/spatialmodel/inmap/epi"
+	"github.com/Amen-Tes/inmap/emissions/slca/eieio/eieiorpc"
+	"github.com/Amen-Tes/inmap/epi"
 )
 
 func init() {
 	gob.Register(popIncidence{})
+}
+
+func DemographToCensusPopColumn(dem *eieiorpc.Demograph) (string, error) {
+	// Missing: "Native", "Asian"
+	ethnicityToCensusPopColumn := map[eieiorpc.Ethnicity]string{
+		eieiorpc.Ethnicity_Ethnicity_All: "TotalPop",
+		eieiorpc.Ethnicity_Black:         "Black",
+		eieiorpc.Ethnicity_Hispanic:      "Latino",
+		eieiorpc.Ethnicity_WhiteOther:    "WhiteNoLat",
+	}
+
+	var ethnicity eieiorpc.Ethnicity
+	// var decile eieiorpc.Decile
+	isEthnicity, isDecile := false, false
+	switch typedDem := dem.Demographic.(type) {
+	case *eieiorpc.Demograph_Ethnicity:
+		ethnicity, isEthnicity = typedDem.Ethnicity, true
+		// case *eieiorpc.Demograph_Decile:
+		// 	decile, isDecile = typedDem.Decile, true
+	}
+
+	var populationString string
+	if isEthnicity {
+		populationString = ethnicityToCensusPopColumn[ethnicity]
+	} else if isDecile {
+		return "", errors.New("support not yet offered for deciles")
+	} else {
+		return "", errors.New("support only offered for ethnicity and decile demographs")
+	}
+	return populationString, nil
+}
+
+// Wrapper for PopulationIncidence that takes demographic instead of string
+func (c *CSTConfig) PopulationIncidenceDem(ctx context.Context, request *eieiorpc.PopulationIncidenceDemInput) (*eieiorpc.PopulationIncidenceDemOutput, error) {
+	populationString, err := DemographToCensusPopColumn(request.Population)
+	if err != nil {
+		return nil, err
+	}
+
+	demOutput, err := c.PopulationIncidence(ctx, &eieiorpc.PopulationIncidenceInput{
+		Year:       request.GetYear(),
+		Population: populationString,
+		HR:         request.GetHR(),
+		AQM:        request.GetAQM(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &eieiorpc.PopulationIncidenceDemOutput{
+		Population: demOutput.GetPopulation(),
+		Incidence:  demOutput.GetIncidence(),
+	}, nil
+}
+
+
+// Wrapper for PopulationIncidence that takes demographic instead of string
+func (c *CSTConfig) PopulationCountDem(ctx context.Context, request *eieiorpc.PopulationCountDemInput) ([]float64, error) {
+	populationString, err := DemographToCensusPopColumn(request.Population)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.PopulationCount(ctx, &eieiorpc.PopulationCountInput{
+		Year:       request.GetYear(),
+		Population: populationString,
+		HR:         request.GetHR(),
+		AQM:        request.GetAQM(),
+	})
+}
+
+
+func (c *CSTConfig) PopulationCount(ctx context.Context, request *eieiorpc.PopulationCountInput) ([]float64, error) {
+	if request.IsIncomePop {
+		return c.populationIncomeCount(ctx, request)
+	} else {
+		return c.populationEthnicityCount(ctx, request)
+	}
+}
+
+func (c *CSTConfig) populationIncomeCount(ctx context.Context, request *eieiorpc.PopulationCountInput) ([]float64, error) {
+	c.loadPopulationOnce.Do(func() {
+		c.popRequestCache = loadCacheOnce(c.popIncomeWorker, 1, 1, c.SpatialCache,
+			requestcache.MarshalGob, requestcache.UnmarshalGob)
+	})
+	r := c.popRequestCache.NewRequest(ctx, struct {
+		aqm  string
+		year int
+	}{year: int(request.Year), aqm: request.AQM}, fmt.Sprintf("populationIncomeCount_%s_%d", request.AQM, request.Year))
+	resultI, err := r.Result()
+	if err != nil {
+		return nil, err
+	}
+	result := resultI.(map[string][]float64)
+	p, ok := result[request.Population]
+	if !ok {
+		return nil, fmt.Errorf("slca: invalid population type %s", request.Population)
+	}
+	return p, nil
+}
+
+
+func (c *CSTConfig) populationEthnicityCount(ctx context.Context, request *eieiorpc.PopulationCountInput) ([]float64, error) {
+	c.loadPopulationOnce.Do(func() {
+		c.popRequestCache = loadCacheOnce(c.popEthnicityWorker, 1, 1, c.SpatialCache,
+			requestcache.MarshalGob, requestcache.UnmarshalGob)
+	})
+	if _, ok := c.censusFile[int(request.Year)]; !ok {
+		result, err := c.interpolatePopulationIncidence(ctx, request.AQM, int(request.Year), request.Population, request.HR)
+		return result.Population, err
+	}
+	r := c.popRequestCache.NewRequest(ctx, struct {
+		aqm  string
+		year int
+		hr   string
+	}{year: int(request.Year), hr: request.HR, aqm: request.AQM}, fmt.Sprintf("populationIncidence_%s_%d_%s", request.AQM, request.Year, request.HR))
+	resultI, err := r.Result()
+	if err != nil {
+		return nil, err
+	}
+	result := resultI.(map[string][]float64)
+	p, ok := result[request.Population]
+	if !ok {
+		return nil, fmt.Errorf("slca: invalid population type %s", request.Population)
+	}
+	return p, nil
 }
 
 // PopulationIncidence returns gridded population counts and underlying
@@ -77,6 +204,40 @@ func (c *CSTConfig) PopulationIncidence(ctx context.Context, request *eieiorpc.P
 
 type popIncidence struct {
 	P, Io map[string][]float64
+}
+
+func (c *CSTConfig) popIncomeWorker(_ context.Context, aqmYearI interface{}) (interface{}, error) {
+	aqmYear := aqmYearI.(struct {
+		aqm string
+		year int
+	})
+	pop, popIndices, err := c.loadPopIncomeSpatial(aqmYear.year)
+	if err != nil {
+		return nil, err
+	}
+	griddedPop, err := c.gridPopulation(pop, aqmYear.aqm, popIndices)
+	if err != nil {
+		return nil, err
+	}
+	return griddedPop, nil
+}
+
+// popEthnicityWorker calculates the population in each cell is calculated as an area-weighted average.
+func (c *CSTConfig) popEthnicityWorker(ctx context.Context, aqmYearHRI interface{}) (interface{}, error) {
+	aqmYearHR := aqmYearHRI.(struct {
+		aqm  string
+		year int
+		hr   string
+	})
+	pop, popIndices, _, _, err := c.loadPopMort(aqmYearHR.year)
+	if err != nil {
+		return nil, err
+	}
+	griddedPop, err := c.gridPopulation(pop, aqmYearHR.aqm, popIndices)
+	if err != nil {
+		return nil, err
+	}
+	return griddedPop, nil
 }
 
 // popIncidenceWorker calculates the population and underlying mortality incidence rate.
@@ -277,6 +438,18 @@ func (c *CSTConfig) griddedIncidence(aqm string, mortIndex, popIndex *rtree.Rtre
 	return o, nil
 }
 
+func (c *CSTConfig) loadPopIncomeSpatial(year int) (*rtree.Rtree, map[string]int, error) {
+	gridSR, err := proj.Parse(c.SpatialConfig.OutputSR)
+	if err != nil {
+		return nil, nil, fmt.Errorf("slca: while parsing OutputSR: %v", err)
+	}
+	pop, popIndex, err := c.loadPopIncome(year, gridSR)
+	if err != nil {
+		return nil, nil, fmt.Errorf("slca: while loading population: %v", err)
+	}
+	return pop, popIndex, nil
+}
+
 // loadPopMort loads the population and mortality rate data from the shapefiles
 // specified in the receiver.
 func (c *CSTConfig) loadPopMort(year int) (*rtree.Rtree, map[string]int, []*mortality, map[string]int, error) {
@@ -312,6 +485,155 @@ type mortality struct {
 	Io []float64
 }
 
+
+func incomeCategoryToDeciles(categoryLowerBounds []int, decileLowerBounds []int) [][]float64{
+	contributionToDecile := make([][]float64, len(categoryLowerBounds))
+	for i := range contributionToDecile {
+		contributionToDecile[i] = make([]float64, len(decileLowerBounds))
+	}
+
+	currDecileIdx := 0
+	for i := 0; i < len(categoryLowerBounds) - 1; i++ {
+		lowerBound := categoryLowerBounds[i]
+		upperBound := categoryLowerBounds[i+1]
+
+		var currDecileEnd int
+		if currDecileIdx == len(decileLowerBounds) - 1 {
+			currDecileEnd = int(math.Inf(1))
+		} else {
+			currDecileEnd = decileLowerBounds[currDecileIdx+1]
+		}
+
+		if (lowerBound <= currDecileEnd) && (currDecileEnd <= upperBound) {
+			percentBelowDecile := float64(currDecileEnd- lowerBound)/float64(upperBound - lowerBound)
+			contributionToDecile[i][currDecileIdx] = percentBelowDecile
+			contributionToDecile[i][currDecileIdx + 1] = 1 - percentBelowDecile
+			currDecileIdx += 1
+		} else {
+			contributionToDecile[i][currDecileIdx] = 1
+		}
+	}
+	contributionToDecile[len(categoryLowerBounds) - 1][currDecileIdx] = 1
+
+	return contributionToDecile
+}
+
+
+// loadPopIncome loads population income information from a shapefile, converting it
+// to spatial reference sr. The function outputs an index holding the income population
+// information.
+func (c *CSTConfig) loadPopIncome(year int, sr *proj.SR) (*rtree.Rtree, map[string]int, error) {
+	var err error
+	f, ok := c.censusFile[year]
+	if !ok {
+		return nil, nil, fmt.Errorf("slca: missing population data for year %d", year)
+	}
+	popshp, err := shp.NewDecoder(f)
+	if err != nil {
+		return nil, nil, err
+	}
+	popsr, err := popshp.SR()
+	if err != nil {
+		return nil, nil, err
+	}
+	trans, err := popsr.NewTransform(sr)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Create a list of array indices for each decile
+	decileIndices := make(map[string]int)
+	for i, decilePopName := range c.CensusIncomeDecileNames {
+		decileIndices[decilePopName] = i
+	}
+
+	CategoryLowerBounds := []int{0, 10000, 15000, 20000, 25000, 30000, 35000, 40000,
+		45000, 50000, 60000, 75000, 100000, 125000, 150000, 200000}
+	DecileLowerBounds := []int{0, 11890, 19572, 27964, 37638, 49452, 62587, 79640,
+		103507, 144180}
+	catToDecile := incomeCategoryToDeciles(CategoryLowerBounds, DecileLowerBounds)
+
+	pop := rtree.NewTree(25, 50)
+	var totalNumHouseholds float64
+	var totalPopSize float64
+	for {
+		g, fields, more := popshp.DecodeRowFields(append(c.CensusIncomeCatColumns, c.CensusTotalPopColumn)...)
+		if !more {
+			break
+		}
+
+		s, ok := fields[c.CensusTotalPopColumn]
+		if !ok {
+			return nil, nil, fmt.Errorf("inmap: loading income population shapefile: missing attribute column %s", c.CensusTotalPopColumn)
+		}
+		totalPopSize, err = s2f(s)
+		if err != nil {
+			return nil, nil, err
+		}
+		if math.IsNaN(totalPopSize) {
+			return nil, nil, fmt.Errorf("inmap: loadPopIncome: NaN population value")
+		}
+
+		numHouseholdsByDecile := make([]float64, len(DecileLowerBounds))
+		currDecileIdx := 0
+		for i, pop := range c.CensusIncomeCatColumns {
+			s, ok := fields[pop]
+			if !ok {
+				return nil, nil, fmt.Errorf("inmap: loading income population shapefile: missing attribute column %s", pop)
+			}
+			var categoryValue float64
+			categoryValue, err = s2f(s)
+			if err != nil {
+				return nil, nil, err
+			}
+			if math.IsNaN(categoryValue) {
+				return nil, nil, fmt.Errorf("inmap: loadPopIncome: NaN population value")
+			}
+
+			if i == 0 {
+				totalNumHouseholds = categoryValue
+			} else {
+				decileNum := i-1 // because first is total
+				// convert categories to deciles
+				for catToDecile[decileNum][currDecileIdx] != 0 {
+					numHouseholdsByDecile[currDecileIdx] += categoryValue * catToDecile[decileNum][currDecileIdx]
+					currDecileIdx += 1
+					if currDecileIdx == 10 {
+						break
+					}
+				}
+				currDecileIdx -= 1 // last one was one too far -- move back
+			}
+		}
+
+		// convert number of households by decile to estimation of
+		// number of individuals by decile (using household proportion)
+		p := new(population)
+		p.PopData = make([]float64, len(DecileLowerBounds))
+		for decile, numHouseholds := range numHouseholdsByDecile {
+			p.PopData[decile] = totalPopSize * (numHouseholds/totalNumHouseholds)
+		}
+
+		gg, err := g.Transform(trans)
+		if err != nil {
+			return nil, nil, err
+		}
+		switch gg.(type) {
+		case geom.Polygonal:
+			p.Polygonal = gg.(geom.Polygonal)
+		default:
+			return nil, nil, fmt.Errorf("inmap: loadPopIncome: population shapes need to be polygons")
+		}
+		pop.Insert(p)
+	}
+	if err := popshp.Error(); err != nil {
+		return nil, nil, err
+	}
+	popshp.Close()
+	return pop, decileIndices, nil
+}
+
+
 // loadPopulation loads population information from a shapefile, converting it
 // to spatial reference sr. The function outputs an index holding the population
 // information.
@@ -333,6 +655,7 @@ func (c *CSTConfig) loadPopulation(year int, sr *proj.SR) (*rtree.Rtree, map[str
 	if err != nil {
 		return nil, nil, err
 	}
+
 	// Create a list of array indices for each population type.
 	popIndices := make(map[string]int)
 	for i, p := range c.CensusPopColumns {

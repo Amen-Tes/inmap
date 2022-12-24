@@ -12,7 +12,7 @@ There are currently three ways to specify emissions, which we will describe here
 Users can use any combination of these three methods to specify emissions for a simulation, and all specified emissions will be combined together.
 The examples below all assume that configuration is specified in a configuration file, but command line arguments or environment variables can be used with minimal changes as described [here](run_config.html).
 
-Fully-working example configuration files with different emissions types are available [here](https://github.com/spatialmodel/inmap/tree/master/cmd/inmap)
+Fully-working example configuration files with different emissions types are available [here](https://github.com/Amen-Tes/inmap/tree/master/cmd/inmap)
 
 ### Emissions shapefiles
 
@@ -21,7 +21,7 @@ Within the shapefiles, emissions can be expressed as point, line, or polygon geo
 Users can specify a list of more than one shapefile, and emissions from all specified shapefiles will be included together in a single simulation (rather than running separate simulations for each shapefile).
 An example of how to specify shapefile emissions is below.
 
-``` toml
+```toml
 EmissionsShapefiles = [
   "emissions/emis1.shp",
   "emissions/emis2.shp"
@@ -42,7 +42,7 @@ Most formats included in the [SMOKE user manual](https://www.cmascenter.org/smok
 As with emissions shapefiles, InMAP will only use emissions records with pollutants named `VOC`, `NOx`, `NH3`, `SOx`, or `PM2_5`, so in many cases emissions files obtained from govenment agencies may need to be modified to change pollutant names before they are used in InMAP.
 An example of how to specify SMOKE-formatted emissions is below.
 
-``` toml
+```toml
 [aep]
 SrgSpecSMOKE = "srgspec.txt"
 GridRef = ["gridref.txt"]
@@ -66,12 +66,12 @@ Emissions are assumed to be per year or per month, depending on the type of SMOK
 
 `GridRef` specifies a path to a file that matches emissions records to spatial surrogates. The GridRef file is specified in the [SMOKE manual](https://www.cmascenter.org/smoke/documentation/4.6/html/ch08s04s03.html).
 
-`SrgSpecSMOKE` and `SrgSpecOSM` specify paths to files that match spatial surrogate codes to the spatial information used to create spatial surrogates. Two file formats can be used either `SrgSpecSMOKE` for a [SMOKE-formatted surrogate specification file](https://raw.githubusercontent.com/spatialmodel/inmap/master/emissions/aep/data/nei2014/surrogate_specification_2014.csv) or `SrgSpecOSM` for a surrogate specification file matching [this format](https://github.com/spatialmodel/inmap/blob/master/emissions/aep/testdata/srgspec_osm.json) that uses [OpenStreetMap](https://www.openstreetmap.org/) data to create spatial surrogates.
+`SrgSpecSMOKE` and `SrgSpecOSM` specify paths to files that match spatial surrogate codes to the spatial information used to create spatial surrogates. Two file formats can be used either `SrgSpecSMOKE` for a [SMOKE-formatted surrogate specification file](https://raw.githubusercontent.com/spatialmodel/inmap/master/emissions/aep/data/nei2014/surrogate_specification_2014.csv) or `SrgSpecOSM` for a surrogate specification file matching [this format](https://github.com/Amen-Tes/inmap/blob/master/emissions/aep/testdata/srgspec_osm.json) that uses [OpenStreetMap](https://www.openstreetmap.org/) data to create spatial surrogates.
 
 If the fields for `GridRef` and `SrgSpec` are left empty, then emissions records will be allocated directly to the InMAP grid: no spatial surrogates will be used.
 Here is an example of the same configuration above, but changed so that no spatial surrogates are used:
 
-``` toml
+```toml
 [aep]
 SrgSpecSMOKE = ""
 GridRef = []
@@ -93,7 +93,7 @@ GridRef = []
 The third option for inputting emissions is to used [COARDS](https://ferret.pmel.noaa.gov/Ferret/documentation/coards-netcdf-conventions)-formatted [NetCDF](https://www.unidata.ucar.edu/software/netcdf/) files.
 Specifying COARDS emissions files is almost the same as specifying SMOKE-formatted files, but `[aep.InventoryConfig.NEIFiles]` is replaced with `[aep.InventoryConfig.COARDSFiles]` and an additional `COARDSYear` variable (which specifies the emissions year) is required as shown below:
 
-``` toml
+```toml
 [aep]
 SrgSpecSMOKE = ""
 GridRef = []

@@ -24,8 +24,8 @@ import (
 	"testing"
 
 	"github.com/ctessum/geom"
-	"github.com/spatialmodel/inmap"
-	"github.com/spatialmodel/inmap/science/chem/simplechem"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/science/chem/simplechem"
 )
 
 func TestDynamicGrid(t *testing.T) {
@@ -109,7 +109,7 @@ func TestDynamicGrid(t *testing.T) {
 	deaths := r["TotalPopD"]
 	latino := r["Latino"]
 	latinoMort := r["LatinoMort"]
-	expectedDeaths := []float64{17.062006521104145, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	expectedDeaths := []float64{17.06173879786874, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	expectedLatinoPops := []float64{25000.00000157229, 4999.999998427711, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	expectedLatinoMorts := []float64{480.00000002012524, 800, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 

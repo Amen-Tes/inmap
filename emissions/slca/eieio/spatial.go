@@ -26,13 +26,13 @@ import (
 	"sync"
 
 	"github.com/ctessum/requestcache"
-	"github.com/spatialmodel/inmap"
-	"github.com/spatialmodel/inmap/emissions/aep"
-	"github.com/spatialmodel/inmap/epi"
+	"github.com/Amen-Tes/inmap"
+	"github.com/Amen-Tes/inmap/emissions/aep"
+	"github.com/Amen-Tes/inmap/epi"
 	"gonum.org/v1/gonum/mat"
 
-	"github.com/spatialmodel/inmap/emissions/slca"
-	"github.com/spatialmodel/inmap/emissions/slca/eieio/eieiorpc"
+	"github.com/Amen-Tes/inmap/emissions/slca"
+	"github.com/Amen-Tes/inmap/emissions/slca/eieio/eieiorpc"
 )
 
 // SpatialEIO implements a spatial EIO LCA model.
@@ -54,10 +54,15 @@ type SpatialEIO struct {
 	// sccIndex maps SCC codes to indices in the SCCs list.
 	sccIndex map[slca.SCC]int
 
-	// sccMap provides a mapping between the SCC codes ('SCCs' above)
+	// SCCMap provides a mapping between the SCC codes ('SCCs' above)
 	// and IO industries, where the outer index is the SCC code  and the
 	// inner index is the IO industry.
-	sccMap [][]int
+	SCCMap [][]int
+
+	// IndustryToSCCMap provides a mapping between the IO industries
+	// and the SCC codes, where the outer index is the IO industry
+	// and the inner index is the SCC code
+	IndustryToSCCMap [][]int
 
 	// SpatialRefs are a list of spatial references
 	// corresponding to the SCCs.

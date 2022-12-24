@@ -28,14 +28,14 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/spatialmodel/inmap/emissions/aep"
-	"github.com/spatialmodel/inmap/emissions/aep/aeputil"
-	"github.com/spatialmodel/inmap/epi"
+	"github.com/Amen-Tes/inmap/emissions/aep"
+	"github.com/Amen-Tes/inmap/emissions/aep/aeputil"
+	"github.com/Amen-Tes/inmap/epi"
 
 	"github.com/ctessum/geom"
 	"github.com/ctessum/geom/index/rtree"
 	"github.com/ctessum/requestcache"
-	"github.com/spatialmodel/inmap/sr"
+	"github.com/Amen-Tes/inmap/sr"
 )
 
 // DB is a holder for an SLCA database.
@@ -74,6 +74,19 @@ type CSTConfig struct {
 	// CensusPopColumns specifies the names of the population attribute
 	// columns in CensusFile.
 	CensusPopColumns []string
+
+	// CensusTotalPopColumn specifies the name of the total population
+	// attribute column in CensusFile
+	CensusTotalPopColumn string
+
+	// CensusIncomeColumns specifies the names of the income category
+	// attribute columns in CensusFile (starting with the total, and then
+	// in ascending order).
+	CensusIncomeCatColumns []string
+
+	// CensusncomeDecileNames specifies the names of the income decile
+	// population names to be produced. Length must be exactly 10
+	CensusIncomeDecileNames []string
 
 	// MortalityRateFile specifies the location of the shapefile holding
 	// baseline mortality rate information for each analysis year.

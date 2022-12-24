@@ -23,7 +23,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/spatialmodel/inmap"
+	"github.com/Amen-Tes/inmap"
 )
 
 // Preproc preprocesses chemical transport model

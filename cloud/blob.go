@@ -27,7 +27,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/spatialmodel/inmap/cloud/cloudrpc"
+	"github.com/Amen-Tes/inmap/cloud/cloudrpc"
 	"gocloud.dev/blob"
 )
 
